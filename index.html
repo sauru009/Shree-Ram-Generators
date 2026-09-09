@@ -28,6 +28,7 @@ body{
   background:var(--bg); color:var(--text);
   font-family:'Inter',-apple-system,sans-serif; font-size:14px;
   min-height:100vh; padding-bottom:env(safe-area-inset-bottom);
+  padding-top:env(safe-area-inset-top);
 }
 h1,h2,h3,.num{font-family:'Archivo',sans-serif;}
 #app{display:flex; min-height:100vh;}
@@ -44,7 +45,7 @@ nav{width:180px; background:var(--panel); border-right:1px solid var(--line); fl
 main{flex:1; padding:26px 30px; max-width:1180px;}
 @media (max-width:760px){
   #app{flex-direction:column;}
-  nav{width:100%; flex-direction:row; overflow-x:auto; padding:12px 0;}
+  nav{width:100%; flex-direction:row; overflow-x:auto; padding:12px 0; padding-left:env(safe-area-inset-left); padding-right:env(safe-area-inset-right);}
   .brand{display:none;}
   .navbtn{white-space:nowrap; border-left:none; border-bottom:2px solid transparent; padding:8px 14px;}
   .navbtn.active{border-bottom-color:var(--amber);}
