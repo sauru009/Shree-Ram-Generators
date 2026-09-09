@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Shree Ram Gen">
+<title>Shree Ram Generators</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+:root{
+  --bg:#181C21;
+  --panel:#20252C;
+  --panel-2:#262C34;
+  --line:#343B44;
+  --amber:#F0A93C;
+  --green:#4FAE7C;
+  --red:#D9614F;
+  --blue:#5B93C9;
+  --text:#EDEAE3;
+  --text-dim:#9BA2AC;
+  --text-faint:#666E79;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{
+  background:var(--bg); color:var(--text);
+  font-family:'Inter',-apple-system,sans-serif; font-size:14px;
+  min-height:100vh; padding-bottom:env(safe-area-inset-bottom);
+}
+h1,h2,h3,.num{font-family:'Archivo',sans-serif;}
+#app{display:flex; min-height:100vh;}
+nav{width:180px; background:var(--panel); border-right:1px solid var(--line); flex-shrink:0; display:flex; flex-direction:column; padding:20px 0;}
+.brand{padding:0 18px 20px 18px; border-bottom:1px solid var(--line); margin-bottom:14px;}
+.brand .mark{width:30px;height:30px; background:var(--amber); border-radius:3px; display:flex;align-items:center;justify-content:center; font-family:'Archivo';font-weight:800;font-size:15px;color:#1A1A1A; margin-bottom:10px;}
+.brand h1{font-size:15px; font-weight:700;}
+.brand p{font-size:11px; color:var(--text-faint); margin-top:2px;}
+.navbtn{text-align:left; background:none; border:none; color:var(--text-dim); padding:10px 18px; font-family:'Inter'; font-size:13.5px; font-weight:500; cursor:pointer; border-left:2px solid transparent; display:flex; justify-content:space-between; align-items:center;}
+.navbtn:hover{color:var(--text); background:var(--panel-2);}
+.navbtn.active{color:var(--amber); border-left-color:var(--amber); background:var(--panel-2);}
+.navbtn .count{font-family:'Archivo'; font-size:11px; color:var(--text-faint); background:var(--bg); padding:1px 7px; border-radius:8px;}
+.navbtn.active .count{color:var(--amber);}
+main{flex:1; padding:26px 30px; max-width:1180px;}
+@media (max-width:760px){
+  #app{flex-direction:column;}
+  nav{width:100%; flex-direction:row; overflow-x:auto; padding:12px 0;}
+  .brand{display:none;}
+  .navbtn{white-space:nowrap; border-left:none; border-bottom:2px solid transparent; padding:8px 14px;}
+  .navbtn.active{border-bottom-color:var(--amber);}
+  main{padding:18px 16px;}
+}
+.view{display:none;} .view.active{display:block;}
+.header-row{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:20px; flex-wrap:wrap; gap:10px;}
+.header-row h2{font-size:20px; font-weight:700;}
+.header-row .sub{color:var(--text-dim); font-size:12.5px; margin-top:3px;}
+button{cursor:pointer; font-family:'Inter';}
+.btn{background:var(--amber); color:#1A1A1A; border:none; padding:9px 16px; border-radius:3px; font-weight:600; font-size:13px;}
+.btn:hover{background:#f5b754;}
+.btn.ghost{background:none; border:1px solid var(--line); color:var(--text); padding:8px 15px; border-radius:3px; font-weight:500; font-size:13px;}
+.btn.ghost:hover{border-color:var(--text-dim);}
+.stats{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px;}
+@media (max-width:760px){.stats{grid-template-columns:repeat(2,1fr);}}
+.stat{background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--amber); padding:14px 16px; border-radius:2px;}
+.stat .num{font-size:26px; font-weight:800;}
+.stat .lbl{font-size:11.5px; color:var(--text-dim); margin-top:3px;}
+.alertbox{background:rgba(217,97,79,.08); border:1px solid rgba(217,97,79,.35); border-left:3px solid var(--red); border-radius:2px; padding:12px 16px; margin-bottom:20px;}
+.alertbox h4{font-size:12.5px; color:var(--red); font-weight:700; margin-bottom:8px;}
+.alertbox ul{list-style:none;}
+.alertbox li{font-size:12.5px; color:var(--text-dim); padding:3px 0;}
+.alertbox li b{color:var(--text);}
+.section-title{font-size:14px; font-weight:700; margin:22px 0 10px 0;}
+.tablewrap{background:var(--panel); border:1px solid var(--line); border-radius:3px; overflow:hidden; margin-bottom:8px; overflow-x:auto;}
+table{width:100%; border-collapse:collapse; font-size:12.8px; min-width:600px;}
+th{text-align:left; padding:9px 12px; background:var(--panel-2); color:var(--text-faint); font-weight:600; font-size:10.8px; border-bottom:1px solid var(--line); white-space:nowrap;}
+td{padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:middle; white-space:nowrap;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--panel-2);}
+.muted{color:var(--text-dim);}
+.badge{display:inline-block; padding:3px 9px; border-radius:2px; font-size:10.5px; font-weight:600; border:1px solid transparent;}
+.badge.available{background:rgba(79,174,124,.12); color:var(--green); border-color:rgba(79,174,124,.3);}
+.badge.onjob{background:rgba(240,169,60,.12); color:var(--amber); border-color:rgba(240,169,60,.3);}
+.badge.maint{background:rgba(217,97,79,.12); color:var(--red); border-color:rgba(217,97,79,.3);}
+.badge.pending{background:rgba(91,147,201,.12); color:var(--blue); border-color:rgba(91,147,201,.3);}
+.badge.completed{background:rgba(255,255,255,.06); color:var(--text-faint); border-color:var(--line);}
+.actions{display:flex; gap:8px;}
+.iconbtn{background:none; border:none; color:var(--text-faint); font-size:12.5px; padding:2px 4px;}
+.iconbtn:hover{color:var(--text);}
+.overlay{display:none; position:fixed; inset:0; background:rgba(10,12,14,.65); align-items:center; justify-content:center; z-index:50; padding:20px; overflow-y:auto;}
+.overlay.active{display:flex;}
+.modal{background:var(--panel); border:1px solid var(--line); border-radius:4px; width:100%; max-width:500px; max-height:88vh; overflow-y:auto; padding:22px; margin:auto;}
+.modal h3{font-size:16px; margin-bottom:16px; font-weight:700;}
+.field{margin-bottom:13px;}
+.field label{display:block; font-size:11.5px; color:var(--text-dim); margin-bottom:5px; font-weight:600;}
+.field input, .field select{width:100%; background:var(--bg); border:1px solid var(--line); color:var(--text); padding:9px 11px; border-radius:3px; font-family:'Inter'; font-size:13.5px;}
+.field input:focus, .field select:focus{outline:none; border-color:var(--amber);}
+.field-row{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.field-row3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px;}
+.modal-actions{display:flex; justify-content:flex-end; gap:10px; margin-top:18px;}
+.empty{padding:40px 20px; text-align:center; color:var(--text-faint);}
+.empty p{margin-top:6px; font-size:12.5px;}
+.hint{font-size:11px; color:var(--text-faint); margin-top:4px;}
+.readout{background:var(--bg); border:1px solid var(--line); padding:9px 11px; border-radius:3px; font-size:13.5px; color:var(--text-dim);}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <nav>
+    <div class="brand">
+      <div class="mark">G</div>
+      <h1>Shree Ram Generators</h1>
+      <p>Dispatch &amp; rental ops</p>
+    </div>
+    <button class="navbtn active" data-view="dashboard">Dashboard</button>
+    <button class="navbtn" data-view="fleet">Fleet <span class="count" id="nav-fleet-count">0</span></button>
+    <button class="navbtn" data-view="drivers">Drivers <span class="count" id="nav-drivers-count">0</span></button>
+    <button class="navbtn" data-view="contacts">Contacts <span class="count" id="nav-contacts-count">0</span></button>
+    <button class="navbtn" data-view="orders">Orders <span class="count" id="nav-orders-count">0</span></button>
+  </nav>
+
+  <main>
+    <!-- DASHBOARD -->
+    <div class="view active" id="view-dashboard">
+      <div class="header-row"><div><h2>Dashboard</h2><div class="sub">Live status across your fleet</div></div></div>
+      <div class="stats" id="stat-cards"></div>
+      <div id="alerts-slot"></div>
+
+      <div class="section-title">Today's orders</div>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Customer</th><th>Location</th><th>Generator</th><th>Driver</th><th>Dates</th><th>Status</th></tr></thead>
+        <tbody id="today-orders-body"></tbody>
+      </table></div>
+
+      <div class="section-title">Tomorrow's orders</div>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Customer</th><th>Location</th><th>Generator</th><th>Driver</th><th>Dates</th><th>Status</th></tr></thead>
+        <tbody id="tomorrow-orders-body"></tbody>
+      </table></div>
+    </div>
+
+    <!-- FLEET -->
+    <div class="view" id="view-fleet">
+      <div class="header-row">
+        <div><h2>Fleet</h2><div class="sub">Generators mounted on trucks</div></div>
+        <button class="btn" id="btn-add-gen">+ Add generator</button>
+      </div>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Label</th><th>Capacity</th><th>Fuel</th><th>Truck reg.</th><th>Truck cap.</th><th>Gen service due</th><th>Truck service due</th><th>Status</th><th></th></tr></thead>
+        <tbody id="fleet-body"></tbody>
+      </table></div>
+    </div>
+
+    <!-- DRIVERS -->
+    <div class="view" id="view-drivers">
+      <div class="header-row">
+        <div><h2>Drivers</h2><div class="sub">Your fleet crew</div></div>
+        <button class="btn" id="btn-add-driver">+ Add driver</button>
+      </div>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Name</th><th>Phone</th><th>License no.</th><th>License expiry</th><th>Status</th><th></th></tr></thead>
+        <tbody id="drivers-body"></tbody>
+      </table></div>
+    </div>
+
+    <!-- CONTACTS -->
+    <div class="view" id="view-contacts">
+      <div class="header-row">
+        <div><h2>Contacts</h2><div class="sub">Saved customers — select these while creating an order</div></div>
+        <button class="btn" id="btn-add-contact">+ Add contact</button>
+      </div>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Name</th><th>Company</th><th>GSTIN</th><th>Phone</th><th>Address</th><th></th></tr></thead>
+        <tbody id="contacts-body"></tbody>
+      </table></div>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="view" id="view-orders">
+      <div class="header-row">
+        <div><h2>Orders</h2><div class="sub">Assign generators &amp; drivers, track billing</div></div>
+        <button class="btn" id="btn-add-order">+ New order</button>
+      </div>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Customer</th><th>Location</th><th>Generator</th><th>Driver</th><th>Dates</th><th>Rate</th><th>Total</th><th>Advance</th><th>Balance</th><th>Status</th><th></th></tr></thead>
+        <tbody id="orders-body"></tbody>
+      </table></div>
+    </div>
+  </main>
+</div>
+
+<!-- Generator modal -->
+<div class="overlay" id="overlay-gen">
+  <div class="modal">
+    <h3 id="gen-modal-title">Add generator</h3>
+    <input type="hidden" id="gen-id">
+    <div class="field-row">
+      <div class="field"><label>Label / ID</label><input id="gen-label" placeholder="e.g. GEN-01"></div>
+      <div class="field"><label>Capacity (kVA)</label><input id="gen-capacity" type="number" placeholder="125"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Fuel type</label>
+        <select id="gen-fuel"><option>Diesel</option><option>Petrol</option><option>Gas</option></select>
+      </div>
+      <div class="field"><label>Status</label>
+        <select id="gen-status"><option>Available</option><option>On Job</option><option>Maintenance</option></select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Truck registration no.</label><input id="gen-truck-reg" placeholder="e.g. MH12 AB 1234"></div>
+      <div class="field"><label>Truck capacity</label><input id="gen-truck-cap" placeholder="e.g. 5 Tonne"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Generator service due</label><input id="gen-service-due" type="date"></div>
+      <div class="field"><label>Truck service due</label><input id="gen-truck-service-due" type="date"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="gen-cancel">Cancel</button>
+      <button class="btn" id="gen-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Driver modal -->
+<div class="overlay" id="overlay-driver">
+  <div class="modal">
+    <h3 id="driver-modal-title">Add driver</h3>
+    <input type="hidden" id="driver-id">
+    <div class="field"><label>Name</label><input id="driver-name" placeholder="e.g. Ramesh Patil"></div>
+    <div class="field-row">
+      <div class="field"><label>Phone</label><input id="driver-phone" placeholder="e.g. 98xxxxxxxx"></div>
+      <div class="field"><label>Status</label>
+        <select id="driver-status"><option>Available</option><option>On Job</option><option>Off</option></select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>License number</label><input id="driver-license" placeholder="License no."></div>
+      <div class="field"><label>License expiry</label><input id="driver-license-expiry" type="date"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="driver-cancel">Cancel</button>
+      <button class="btn" id="driver-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Contact modal -->
+<div class="overlay" id="overlay-contact">
+  <div class="modal">
+    <h3 id="contact-modal-title">Add contact</h3>
+    <input type="hidden" id="contact-id">
+    <div class="field"><label>Name</label><input id="contact-name" placeholder="Contact person"></div>
+    <div class="field-row">
+      <div class="field"><label>Company</label><input id="contact-company" placeholder="Company name"></div>
+      <div class="field"><label>GSTIN</label><input id="contact-gstin" placeholder="27ABCDE1234F1Z5"></div>
+    </div>
+    <div class="field"><label>Phone</label><input id="contact-phone" placeholder="98xxxxxxxx"></div>
+    <div class="field"><label>Address</label><input id="contact-address" placeholder="Billing / office address"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="contact-cancel">Cancel</button>
+      <button class="btn" id="contact-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Order modal -->
+<div class="overlay" id="overlay-order">
+  <div class="modal">
+    <h3 id="order-modal-title">New order</h3>
+    <input type="hidden" id="order-id">
+    <div class="field">
+      <label>Customer</label>
+      <select id="order-contact"></select>
+      <div class="hint">Don't see them? Choose "+ Add new contact" above.</div>
+    </div>
+    <div class="field"><label>Job location</label><input id="order-location" placeholder="Job site address"></div>
+    <div class="field-row">
+      <div class="field"><label>Generator</label><select id="order-gen"></select></div>
+      <div class="field"><label>Driver</label><select id="order-driver"></select></div>
+    </div>
+    <div class="field-row3">
+      <div class="field"><label>Start date</label><input id="order-start" type="date"></div>
+      <div class="field"><label>End date</label><input id="order-end" type="date"></div>
+      <div class="field"><label>Duration</label><div class="readout" id="order-duration">—</div></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Rate basis</label>
+        <select id="order-rate-basis"><option>Daily</option><option>Weekly</option><option>Monthly</option></select>
+      </div>
+      <div class="field"><label>Rate (₹ per basis)</label><input id="order-rate" type="number"></div>
+    </div>
+    <div class="field-row3">
+      <div class="field"><label>Total amount (₹)</label><input id="order-total" type="number"></div>
+      <div class="field"><label>Advance received (₹)</label><input id="order-advance" type="number"></div>
+      <div class="field"><label>Balance to collect</label><div class="readout" id="order-balance">₹0</div></div>
+    </div>
+    <div class="field">
+      <button class="btn ghost" id="order-autocalc" type="button" style="font-size:12px; padding:6px 12px;">Auto-calculate total from rate × duration</button>
+    </div>
+    <div class="field"><label>Status</label>
+      <select id="order-status"><option>Pending</option><option>Assigned</option><option>In Progress</option><option>Completed</option></select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="order-cancel">Cancel</button>
+      <button class="btn" id="order-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let generators = [], drivers = [], contacts = [], orders = [];
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const todayStr = () => new Date().toISOString().slice(0,10);
+const tomorrowStr = () => { const d = new Date(); d.setDate(d.getDate()+1); return d.toISOString().slice(0,10); };
+const daysUntil = (dateStr) => { if(!dateStr) return null; const d = new Date(dateStr+'T00:00:00'); const t = new Date(todayStr()+'T00:00:00'); return Math.round((d-t)/86400000); };
+const money = (n) => '₹' + (Number(n)||0).toLocaleString('en-IN');
+const fmtDate = (d) => { if(!d) return '—'; const dt = new Date(d+'T00:00:00'); return dt.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}); };
+
+async function loadAll(){
+  const keys = ['generators','drivers','contacts','orders'];
+  const results = await Promise.all(keys.map(async k=>{
+    try{ const r = await window.storage.get(k, true); return r ? JSON.parse(r.value) : []; }
+    catch(e){ return []; }
+  }));
+  [generators, drivers, contacts, orders] = results;
+  renderAll();
+}
+async function saveGenerators(){ try{ await window.storage.set('generators', JSON.stringify(generators), true); }catch(e){console.error(e);} }
+async function saveDrivers(){ try{ await window.storage.set('drivers', JSON.stringify(drivers), true); }catch(e){console.error(e);} }
+async function saveContacts(){ try{ await window.storage.set('contacts', JSON.stringify(contacts), true); }catch(e){console.error(e);} }
+async function saveOrders(){ try{ await window.storage.set('orders', JSON.stringify(orders), true); }catch(e){console.error(e);} }
+
+function badgeClass(status){
+  const map = {'Available':'available','On Job':'onjob','Maintenance':'maint','Off':'maint',
+    'Pending':'pending','Assigned':'onjob','In Progress':'onjob','Completed':'completed'};
+  return map[status] || 'pending';
+}
+
+/* ---- nav ---- */
+document.querySelectorAll('.navbtn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-'+btn.dataset.view).classList.add('active');
+  });
+});
+
+function renderAll(){
+  document.getElementById('nav-fleet-count').textContent = generators.length;
+  document.getElementById('nav-drivers-count').textContent = drivers.length;
+  document.getElementById('nav-contacts-count').textContent = contacts.length;
+  document.getElementById('nav-orders-count').textContent = orders.length;
+  renderDashboard();
+  renderFleet();
+  renderDrivers();
+  renderContacts();
+  renderOrders();
+}
+
+function contactLabel(o){
+  const c = contacts.find(x=>x.id===o.contactId);
+  return c ? c.name + (c.company?(' — '+c.company):'') : (o.customer || '—');
+}
+
+function orderRow(o, cols){
+  const gen = generators.find(g=>g.id===o.genId);
+  const drv = drivers.find(d=>d.id===o.driverId);
+  return `<tr>
+    <td>${contactLabel(o)}</td>
+    <td class="muted">${o.location||'—'}</td>
+    <td>${gen?gen.label:'<span class="muted">—</span>'}</td>
+    <td>${drv?drv.name:'<span class="muted">—</span>'}</td>
+    <td class="muted">${fmtDate(o.start)} – ${fmtDate(o.end)}</td>
+    <td><span class="badge ${badgeClass(o.status)}">${o.status}</span></td>
+  </tr>`;
+}
+
+function renderDashboard(){
+  const availGen = generators.filter(g=>g.status==='Available').length;
+  const availDriv = drivers.filter(d=>d.status==='Available').length;
+  const active = orders.filter(o=>o.status==='In Progress'||o.status==='Assigned').length;
+  document.getElementById('stat-cards').innerHTML = `
+    <div class="stat"><div class="num">${generators.length}</div><div class="lbl">Total generators</div></div>
+    <div class="stat"><div class="num">${availGen}</div><div class="lbl">Available now</div></div>
+    <div class="stat"><div class="num">${availDriv} / ${drivers.length}</div><div class="lbl">Drivers free</div></div>
+    <div class="stat"><div class="num">${active}</div><div class="lbl">Active orders</div></div>
+  `;
+
+  // alerts
+  const alerts = [];
+  generators.forEach(g=>{
+    const dg = daysUntil(g.serviceDue);
+    if(dg!==null && dg<=7) alerts.push(`<b>${g.label}</b> generator service ${dg<0?('overdue by '+Math.abs(dg)+'d'):(dg===0?'due today':'due in '+dg+'d')}`);
+    const dt = daysUntil(g.truckServiceDue);
+    if(dt!==null && dt<=7) alerts.push(`<b>${g.truckReg||g.label}</b> truck service ${dt<0?('overdue by '+Math.abs(dt)+'d'):(dt===0?'due today':'due in '+dt+'d')}`);
+  });
+  drivers.forEach(d=>{
+    const dl = daysUntil(d.licenseExpiry);
+    if(dl!==null && dl<=30) alerts.push(`<b>${d.name}</b> license ${dl<0?('expired '+Math.abs(dl)+'d ago'):(dl===0?'expires today':'expires in '+dl+'d')}`);
+  });
+  const slot = document.getElementById('alerts-slot');
+  slot.innerHTML = alerts.length ? `<div class="alertbox"><h4>⚠ Needs attention</h4><ul>${alerts.map(a=>`<li>${a}</li>`).join('')}</ul></div>` : '';
+
+  const t = todayStr(), tm = tomorrowStr();
+  const todays = orders.filter(o=> o.start && o.end && o.start<=t && t<=o.end);
+  const tomorrows = orders.filter(o=> o.start === tm);
+  document.getElementById('today-orders-body').innerHTML = todays.length
+    ? todays.map(o=>orderRow(o)).join('')
+    : `<tr><td colspan="6"><div class="empty">No orders scheduled today</div></td></tr>`;
+  document.getElementById('tomorrow-orders-body').innerHTML = tomorrows.length
+    ? tomorrows.map(o=>orderRow(o)).join('')
+    : `<tr><td colspan="6"><div class="empty">Nothing starting tomorrow</div></td></tr>`;
+}
+
+function renderFleet(){
+  const body = document.getElementById('fleet-body');
+  if(generators.length===0){
+    body.innerHTML = `<tr><td colspan="9"><div class="empty">No generators added<p>Add your 10 units to get started</p></div></td></tr>`;
+    return;
+  }
+  body.innerHTML = generators.map(g=>`
+    <tr>
+      <td><strong>${g.label}</strong></td>
+      <td class="muted">${g.capacity ? g.capacity+' kVA' : '—'}</td>
+      <td class="muted">${g.fuel||'—'}</td>
+      <td class="muted">${g.truckReg||'—'}</td>
+      <td class="muted">${g.truckCap||'—'}</td>
+      <td class="muted">${g.serviceDue?fmtDate(g.serviceDue):'—'}</td>
+      <td class="muted">${g.truckServiceDue?fmtDate(g.truckServiceDue):'—'}</td>
+      <td><span class="badge ${badgeClass(g.status)}">${g.status}</span></td>
+      <td class="actions"><button class="iconbtn" onclick="editGen('${g.id}')">Edit</button><button class="iconbtn" onclick="deleteGen('${g.id}')">Delete</button></td>
+    </tr>
+  `).join('');
+}
+
+function renderDrivers(){
+  const body = document.getElementById('drivers-body');
+  if(drivers.length===0){
+    body.innerHTML = `<tr><td colspan="6"><div class="empty">No drivers added<p>Add your 3 drivers to get started</p></div></td></tr>`;
+    return;
+  }
+  body.innerHTML = drivers.map(d=>`
+    <tr>
+      <td><strong>${d.name}</strong></td>
+      <td class="muted">${d.phone||'—'}</td>
+      <td class="muted">${d.license||'—'}</td>
+      <td class="muted">${d.licenseExpiry?fmtDate(d.licenseExpiry):'—'}</td>
+      <td><span class="badge ${badgeClass(d.status)}">${d.status}</span></td>
+      <td class="actions"><button class="iconbtn" onclick="editDriver('${d.id}')">Edit</button><button class="iconbtn" onclick="deleteDriver('${d.id}')">Delete</button></td>
+    </tr>
+  `).join('');
+}
+
+function renderContacts(){
+  const body = document.getElementById('contacts-body');
+  if(contacts.length===0){
+    body.innerHTML = `<tr><td colspan="6"><div class="empty">No contacts saved<p>Add customers to reuse them on future orders</p></div></td></tr>`;
+    return;
+  }
+  body.innerHTML = contacts.map(c=>`
+    <tr>
+      <td><strong>${c.name}</strong></td>
+      <td class="muted">${c.company||'—'}</td>
+      <td class="muted">${c.gstin||'—'}</td>
+      <td class="muted">${c.phone||'—'}</td>
+      <td class="muted">${c.address||'—'}</td>
+      <td class="actions"><button class="iconbtn" onclick="editContact('${c.id}')">Edit</button><button class="iconbtn" onclick="deleteContact('${c.id}')">Delete</button></td>
+    </tr>
+  `).join('');
+}
+
+function renderOrders(){
+  const body = document.getElementById('orders-body');
+  if(orders.length===0){
+    body.innerHTML = `<tr><td colspan="11"><div class="empty">No orders yet<p>Create your first assignment</p></div></td></tr>`;
+    return;
+  }
+  const sorted = orders.slice().sort((a,b)=>(b.start||'').localeCompare(a.start||''));
+  body.innerHTML = sorted.map(o=>{
+    const gen = generators.find(g=>g.id===o.genId);
+    const drv = drivers.find(d=>d.id===o.driverId);
+    const balance = (Number(o.total)||0) - (Number(o.advance)||0);
+    return `<tr>
+      <td>${contactLabel(o)}</td>
+      <td class="muted">${o.location||'—'}</td>
+      <td>${gen?gen.label:'<span class="muted">—</span>'}</td>
+      <td>${drv?drv.name:'<span class="muted">—</span>'}</td>
+      <td class="muted">${fmtDate(o.start)} – ${fmtDate(o.end)}</td>
+      <td class="muted">${o.rate?money(o.rate)+'/'+(o.rateBasis||'Daily').toLowerCase():'—'}</td>
+      <td>${money(o.total)}</td>
+      <td class="muted">${money(o.advance)}</td>
+      <td>${money(balance)}</td>
+      <td><span class="badge ${badgeClass(o.status)}">${o.status}</span></td>
+      <td class="actions"><button class="iconbtn" onclick="editOrder('${o.id}')">Edit</button><button class="iconbtn" onclick="deleteOrder('${o.id}')">Delete</button></td>
+    </tr>`;
+  }).join('');
+}
+
+/* ---- generator modal ---- */
+const overlayGen = document.getElementById('overlay-gen');
+document.getElementById('btn-add-gen').onclick = ()=>{
+  document.getElementById('gen-modal-title').textContent = 'Add generator';
+  ['gen-id','gen-label','gen-capacity','gen-truck-reg','gen-truck-cap','gen-service-due','gen-truck-service-due'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('gen-fuel').value = 'Diesel';
+  document.getElementById('gen-status').value = 'Available';
+  overlayGen.classList.add('active');
+};
+document.getElementById('gen-cancel').onclick = ()=> overlayGen.classList.remove('active');
+window.editGen = (id)=>{
+  const g = generators.find(x=>x.id===id); if(!g) return;
+  document.getElementById('gen-modal-title').textContent = 'Edit generator';
+  document.getElementById('gen-id').value = g.id;
+  document.getElementById('gen-label').value = g.label||'';
+  document.getElementById('gen-capacity').value = g.capacity||'';
+  document.getElementById('gen-fuel').value = g.fuel||'Diesel';
+  document.getElementById('gen-status').value = g.status||'Available';
+  document.getElementById('gen-truck-reg').value = g.truckReg||'';
+  document.getElementById('gen-truck-cap').value = g.truckCap||'';
+  document.getElementById('gen-service-due').value = g.serviceDue||'';
+  document.getElementById('gen-truck-service-due').value = g.truckServiceDue||'';
+  overlayGen.classList.add('active');
+};
+window.deleteGen = (id)=>{ generators = generators.filter(g=>g.id!==id); saveGenerators(); renderAll(); };
+document.getElementById('gen-save').onclick = async ()=>{
+  const id = document.getElementById('gen-id').value;
+  const label = document.getElementById('gen-label').value.trim();
+  if(!label) return;
+  const data = {
+    label,
+    capacity: document.getElementById('gen-capacity').value,
+    fuel: document.getElementById('gen-fuel').value,
+    status: document.getElementById('gen-status').value,
+    truckReg: document.getElementById('gen-truck-reg').value.trim(),
+    truckCap: document.getElementById('gen-truck-cap').value.trim(),
+    serviceDue: document.getElementById('gen-service-due').value,
+    truckServiceDue: document.getElementById('gen-truck-service-due').value
+  };
+  if(id){ const idx = generators.findIndex(g=>g.id===id); generators[idx] = {...generators[idx], ...data}; }
+  else generators.push({id: uid(), ...data});
+  await saveGenerators();
+  overlayGen.classList.remove('active');
+  renderAll();
+};
+
+/* ---- driver modal ---- */
+const overlayDriver = document.getElementById('overlay-driver');
+document.getElementById('btn-add-driver').onclick = ()=>{
+  document.getElementById('driver-modal-title').textContent = 'Add driver';
+  ['driver-id','driver-name','driver-phone','driver-license','driver-license-expiry'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('driver-status').value = 'Available';
+  overlayDriver.classList.add('active');
+};
+document.getElementById('driver-cancel').onclick = ()=> overlayDriver.classList.remove('active');
+window.editDriver = (id)=>{
+  const d = drivers.find(x=>x.id===id); if(!d) return;
+  document.getElementById('driver-modal-title').textContent = 'Edit driver';
+  document.getElementById('driver-id').value = d.id;
+  document.getElementById('driver-name').value = d.name||'';
+  document.getElementById('driver-phone').value = d.phone||'';
+  document.getElementById('driver-status').value = d.status||'Available';
+  document.getElementById('driver-license').value = d.license||'';
+  document.getElementById('driver-license-expiry').value = d.licenseExpiry||'';
+  overlayDriver.classList.add('active');
+};
+window.deleteDriver = (id)=>{ drivers = drivers.filter(d=>d.id!==id); saveDrivers(); renderAll(); };
+document.getElementById('driver-save').onclick = async ()=>{
+  const id = document.getElementById('driver-id').value;
+  const name = document.getElementById('driver-name').value.trim();
+  if(!name) return;
+  const data = {
+    name,
+    phone: document.getElementById('driver-phone').value.trim(),
+    status: document.getElementById('driver-status').value,
+    license: document.getElementById('driver-license').value.trim(),
+    licenseExpiry: document.getElementById('driver-license-expiry').value
+  };
+  if(id){ const idx = drivers.findIndex(d=>d.id===id); drivers[idx] = {...drivers[idx], ...data}; }
+  else drivers.push({id: uid(), ...data});
+  await saveDrivers();
+  overlayDriver.classList.remove('active');
+  renderAll();
+};
+
+/* ---- contact modal ---- */
+const overlayContact = document.getElementById('overlay-contact');
+let contactOpenedFromOrder = false;
+function openContactModal(fromOrder){
+  contactOpenedFromOrder = !!fromOrder;
+  document.getElementById('contact-modal-title').textContent = 'Add contact';
+  ['contact-id','contact-name','contact-company','contact-gstin','contact-phone','contact-address'].forEach(id=>document.getElementById(id).value='');
+  overlayContact.classList.add('active');
+}
+document.getElementById('btn-add-contact').onclick = ()=> openContactModal(false);
+document.getElementById('contact-cancel').onclick = ()=> overlayContact.classList.remove('active');
+window.editContact = (id)=>{
+  const c = contacts.find(x=>x.id===id); if(!c) return;
+  contactOpenedFromOrder = false;
+  document.getElementById('contact-modal-title').textContent = 'Edit contact';
+  document.getElementById('contact-id').value = c.id;
+  document.getElementById('contact-name').value = c.name||'';
+  document.getElementById('contact-company').value = c.company||'';
+  document.getElementById('contact-gstin').value = c.gstin||'';
+  document.getElementById('contact-phone').value = c.phone||'';
+  document.getElementById('contact-address').value = c.address||'';
+  overlayContact.classList.add('active');
+};
+window.deleteContact = (id)=>{ contacts = contacts.filter(c=>c.id!==id); saveContacts(); renderAll(); };
+document.getElementById('contact-save').onclick = async ()=>{
+  const id = document.getElementById('contact-id').value;
+  const name = document.getElementById('contact-name').value.trim();
+  if(!name) return;
+  const data = {
+    name,
+    company: document.getElementById('contact-company').value.trim(),
+    gstin: document.getElementById('contact-gstin').value.trim(),
+    phone: document.getElementById('contact-phone').value.trim(),
+    address: document.getElementById('contact-address').value.trim()
+  };
+  let newId = id;
+  if(id){ const idx = contacts.findIndex(c=>c.id===id); contacts[idx] = {...contacts[idx], ...data}; }
+  else { newId = uid(); contacts.push({id: newId, ...data}); }
+  await saveContacts();
+  overlayContact.classList.remove('active');
+  renderAll();
+  if(contactOpenedFromOrder){
+    populateOrderContactSelect(newId);
+  }
+};
+
+/* ---- order modal ---- */
+const overlayOrder = document.getElementById('overlay-order');
+function populateOrderSelects(currentGenId, currentDriverId){
+  const genSel = document.getElementById('order-gen');
+  const drvSel = document.getElementById('order-driver');
+  genSel.innerHTML = '<option value="">— Select generator —</option>' + generators.map(g=>
+    `<option value="${g.id}" ${g.id===currentGenId?'selected':''}>${g.label} ${g.capacity?('('+g.capacity+' kVA)'):''}</option>`
+  ).join('');
+  drvSel.innerHTML = '<option value="">— Select driver —</option>' + drivers.map(d=>
+    `<option value="${d.id}" ${d.id===currentDriverId?'selected':''}>${d.name}</option>`
+  ).join('');
+}
+function populateOrderContactSelect(currentContactId){
+  const sel = document.getElementById('order-contact');
+  sel.innerHTML = '<option value="">— Select customer —</option>' +
+    contacts.map(c=>`<option value="${c.id}" ${c.id===currentContactId?'selected':''}>${c.name}${c.company?(' — '+c.company):''}</option>`).join('') +
+    '<option value="__new__">+ Add new contact</option>';
+}
+document.getElementById('order-contact').addEventListener('change', (e)=>{
+  if(e.target.value === '__new__'){ openContactModal(true); e.target.value = ''; }
+});
+function updateDuration(){
+  const s = document.getElementById('order-start').value, e = document.getElementById('order-end').value;
+  const disp = document.getElementById('order-duration');
+  if(s && e){
+    const days = Math.max(1, Math.round((new Date(e) - new Date(s))/86400000) + 1);
+    disp.textContent = days + (days===1?' day':' days');
+  } else disp.textContent = '—';
+}
+document.getElementById('order-start').addEventListener('change', updateDuration);
+document.getElementById('order-end').addEventListener('change', updateDuration);
+function updateBalance(){
+  const total = Number(document.getElementById('order-total').value)||0;
+  const adv = Number(document.getElementById('order-advance').value)||0;
+  document.getElementById('order-balance').textContent = money(total - adv);
+}
+document.getElementById('order-total').addEventListener('input', updateBalance);
+document.getElementById('order-advance').addEventListener('input', updateBalance);
+document.getElementById('order-autocalc').onclick = ()=>{
+  const s = document.getElementById('order-start').value, e = document.getElementById('order-end').value;
+  const rate = Number(document.getElementById('order-rate').value)||0;
+  const basis = document.getElementById('order-rate-basis').value;
+  if(!s || !e || !rate) return;
+  const days = Math.max(1, Math.round((new Date(e) - new Date(s))/86400000) + 1);
+  let units = days;
+  if(basis==='Weekly') units = days/7;
+  if(basis==='Monthly') units = days/30;
+  const total = Math.round(rate * units);
+  document.getElementById('order-total').value = total;
+  updateBalance();
+};
+document.getElementById('btn-add-order').onclick = ()=>{
+  document.getElementById('order-modal-title').textContent = 'New order';
+  ['order-id','order-location','order-start','order-end','order-rate','order-total','order-advance'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('order-rate-basis').value = 'Daily';
+  document.getElementById('order-status').value = 'Pending';
+  document.getElementById('order-duration').textContent = '—';
+  document.getElementById('order-balance').textContent = '₹0';
+  populateOrderContactSelect('');
+  populateOrderSelects('', '');
+  overlayOrder.classList.add('active');
+};
+document.getElementById('order-cancel').onclick = ()=> overlayOrder.classList.remove('active');
+window.editOrder = (id)=>{
+  const o = orders.find(x=>x.id===id); if(!o) return;
+  document.getElementById('order-modal-title').textContent = 'Edit order';
+  document.getElementById('order-id').value = o.id;
+  document.getElementById('order-location').value = o.location||'';
+  document.getElementById('order-start').value = o.start||'';
+  document.getElementById('order-end').value = o.end||'';
+  document.getElementById('order-rate-basis').value = o.rateBasis||'Daily';
+  document.getElementById('order-rate').value = o.rate||'';
+  document.getElementById('order-total').value = o.total||'';
+  document.getElementById('order-advance').value = o.advance||'';
+  document.getElementById('order-status').value = o.status||'Pending';
+  populateOrderContactSelect(o.contactId||'');
+  populateOrderSelects(o.genId||'', o.driverId||'');
+  updateDuration(); updateBalance();
+  overlayOrder.classList.add('active');
+};
+window.deleteOrder = (id)=>{ orders = orders.filter(o=>o.id!==id); saveOrders(); renderAll(); };
+document.getElementById('order-gen').addEventListener('change', (e)=>{
+  const g = generators.find(x=>x.id===e.target.value);
+  if(g && g.rate && !document.getElementById('order-rate').value) document.getElementById('order-rate').value = g.rate;
+});
+document.getElementById('order-save').onclick = async ()=>{
+  const id = document.getElementById('order-id').value;
+  const contactId = document.getElementById('order-contact').value;
+  if(!contactId || contactId==='__new__') return;
+  const data = {
+    contactId,
+    location: document.getElementById('order-location').value.trim(),
+    genId: document.getElementById('order-gen').value,
+    driverId: document.getElementById('order-driver').value,
+    start: document.getElementById('order-start').value,
+    end: document.getElementById('order-end').value,
+    rateBasis: document.getElementById('order-rate-basis').value,
+    rate: document.getElementById('order-rate').value,
+    total: document.getElementById('order-total').value,
+    advance: document.getElementById('order-advance').value,
+    status: document.getElementById('order-status').value
+  };
+  if(id){ const idx = orders.findIndex(o=>o.id===id); orders[idx] = {...orders[idx], ...data}; }
+  else orders.push({id: uid(), ...data});
+  await saveOrders();
+  overlayOrder.classList.remove('active');
+  renderAll();
+};
+
+loadAll();
+</script>
+</body>
+</html>
