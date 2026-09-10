@@ -23,12 +23,14 @@
   --text-dim:#9BA2AC;
   --text-faint:#666E79;
 }
-*{box-sizing:border-box; margin:0; padding:0;}
+*{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
 body{
   background:var(--bg); color:var(--text);
   font-family:'Inter',-apple-system,sans-serif; font-size:14px;
   min-height:100vh; padding-bottom:env(safe-area-inset-bottom);
   padding-top:env(safe-area-inset-top);
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:none;
 }
 h1,h2,h3,.num{font-family:'Archivo',sans-serif;}
 #app{display:flex; min-height:100vh;}
@@ -40,16 +42,33 @@ nav{width:180px; background:var(--panel); border-right:1px solid var(--line); fl
 .navbtn{text-align:left; background:none; border:none; color:var(--text-dim); padding:10px 18px; font-family:'Inter'; font-size:13.5px; font-weight:500; cursor:pointer; border-left:2px solid transparent; display:flex; justify-content:space-between; align-items:center;}
 .navbtn:hover{color:var(--text); background:var(--panel-2);}
 .navbtn.active{color:var(--amber); border-left-color:var(--amber); background:var(--panel-2);}
+@media (max-width:760px){
+  .navbtn.active{color:var(--amber);}
+}
 .navbtn .count{font-family:'Archivo'; font-size:11px; color:var(--text-faint); background:var(--bg); padding:1px 7px; border-radius:8px;}
 .navbtn.active .count{color:var(--amber);}
 main{flex:1; padding:26px 30px; max-width:1180px;}
 @media (max-width:760px){
   #app{flex-direction:column;}
-  nav{width:100%; flex-direction:row; overflow-x:auto; padding:12px 0; padding-left:env(safe-area-inset-left); padding-right:env(safe-area-inset-right);}
+  nav{
+    position:fixed; left:0; right:0; bottom:0; top:auto; width:100%;
+    flex-direction:row; overflow-x:visible; justify-content:space-around;
+    padding:6px 4px calc(6px + env(safe-area-inset-bottom)) 4px;
+    border-right:none; border-top:1px solid var(--line); z-index:40;
+  }
   .brand{display:none;}
-  .navbtn{white-space:nowrap; border-left:none; border-bottom:2px solid transparent; padding:8px 14px;}
-  .navbtn.active{border-bottom-color:var(--amber);}
-  main{padding:18px 16px;}
+  .navbtn{
+    white-space:nowrap; border-left:none; border-bottom:2px solid transparent;
+    flex-direction:column; gap:3px; padding:6px 4px; flex:1; min-height:48px;
+    align-items:center; justify-content:center; font-size:10.5px; border-radius:6px;
+  }
+  .navbtn.active{border-bottom-color:transparent; background:var(--panel-2);}
+  .navbtn .count{display:none;}
+  .navbtn:active{opacity:.6;}
+  main{padding:16px 14px calc(92px + env(safe-area-inset-bottom)) 14px;}
+  .btn, .btn.ghost{padding:12px 18px; font-size:14px; min-height:44px;}
+  .iconbtn{padding:9px 11px; font-size:13px;}
+  .field input, .field select{font-size:16px; padding:11px 12px; min-height:44px;}
 }
 .view{display:none;} .view.active{display:block;}
 .header-row{display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:20px; flex-wrap:wrap; gap:10px;}
@@ -71,7 +90,7 @@ button{cursor:pointer; font-family:'Inter';}
 .alertbox li{font-size:12.5px; color:var(--text-dim); padding:3px 0;}
 .alertbox li b{color:var(--text);}
 .section-title{font-size:14px; font-weight:700; margin:22px 0 10px 0;}
-.tablewrap{background:var(--panel); border:1px solid var(--line); border-radius:3px; overflow:hidden; margin-bottom:8px; overflow-x:auto;}
+.tablewrap{background:var(--panel); border:1px solid var(--line); border-radius:3px; overflow:hidden; margin-bottom:8px; overflow-x:auto; -webkit-overflow-scrolling:touch;}
 table{width:100%; border-collapse:collapse; font-size:12.8px; min-width:600px;}
 th{text-align:left; padding:9px 12px; background:var(--panel-2); color:var(--text-faint); font-weight:600; font-size:10.8px; border-bottom:1px solid var(--line); white-space:nowrap;}
 td{padding:10px 12px; border-bottom:1px solid var(--line); vertical-align:middle; white-space:nowrap;}
@@ -102,6 +121,11 @@ tbody tr:hover{background:var(--panel-2);}
 .empty p{margin-top:6px; font-size:12.5px;}
 .hint{font-size:11px; color:var(--text-faint); margin-top:4px;}
 .readout{background:var(--bg); border:1px solid var(--line); padding:9px 11px; border-radius:3px; font-size:13.5px; color:var(--text-dim);}
+@media (max-width:760px){
+  .overlay{align-items:flex-end; padding:0;}
+  .modal{max-width:100%; border-radius:16px 16px 0 0; max-height:92vh; padding:18px 18px calc(18px + env(safe-area-inset-bottom)) 18px; animation:sheetUp .22s ease-out;}
+  @keyframes sheetUp{from{transform:translateY(24px); opacity:.4;} to{transform:translateY(0); opacity:1;}}
+}
 </style>
 </head>
 <body>
@@ -118,6 +142,7 @@ tbody tr:hover{background:var(--panel-2);}
     <button class="navbtn" data-view="drivers">Drivers <span class="count" id="nav-drivers-count">0</span></button>
     <button class="navbtn" data-view="contacts">Contacts <span class="count" id="nav-contacts-count">0</span></button>
     <button class="navbtn" data-view="orders">Orders <span class="count" id="nav-orders-count">0</span></button>
+    <button class="navbtn" data-view="about">About</button>
   </nav>
 
   <main>
@@ -168,8 +193,13 @@ tbody tr:hover{background:var(--panel-2);}
     <div class="view" id="view-contacts">
       <div class="header-row">
         <div><h2>Contacts</h2><div class="sub">Saved customers — select these while creating an order</div></div>
-        <button class="btn" id="btn-add-contact">+ Add contact</button>
+        <div style="display:flex; gap:8px;">
+          <label class="btn ghost" for="contact-import-input" style="cursor:pointer;">Import contacts</label>
+          <input type="file" id="contact-import-input" accept=".csv,.vcf,.vcard,text/csv,text/vcard" style="display:none;">
+          <button class="btn" id="btn-add-contact">+ Add contact</button>
+        </div>
       </div>
+      <div class="hint" id="import-status" style="margin-bottom:12px;">Import a .csv (columns: Name, Company, GSTIN, Phone, Address) or a .vcf exported from iCloud/Contacts.</div>
       <div class="tablewrap"><table>
         <thead><tr><th>Name</th><th>Company</th><th>GSTIN</th><th>Phone</th><th>Address</th><th></th></tr></thead>
         <tbody id="contacts-body"></tbody>
@@ -186,6 +216,19 @@ tbody tr:hover{background:var(--panel-2);}
         <thead><tr><th>Customer</th><th>Location</th><th>Generator</th><th>Driver</th><th>Dates</th><th>Rate</th><th>Total</th><th>Advance</th><th>Balance</th><th>Status</th><th></th></tr></thead>
         <tbody id="orders-body"></tbody>
       </table></div>
+    </div>
+
+    <!-- ABOUT -->
+    <div class="view" id="view-about">
+      <div class="header-row"><div><h2>About</h2></div></div>
+      <div class="tablewrap" style="padding:24px;">
+        <div class="mark" style="width:46px;height:46px;font-size:20px; margin-bottom:14px;">G</div>
+        <h3 style="font-size:18px; font-weight:700; margin-bottom:6px;">Shree Ram Generators</h3>
+        <div class="muted" style="font-size:12.5px; line-height:1.8;">
+          Version 1.3<br>
+          Developed by Saurabh
+        </div>
+      </div>
     </div>
   </main>
 </div>
@@ -308,6 +351,15 @@ tbody tr:hover{background:var(--panel-2);}
   </div>
 </div>
 
+<!-- Order info modal -->
+<div class="overlay" id="overlay-orderinfo">
+  <div class="modal" style="max-width:340px;">
+    <h3>Order details</h3>
+    <div class="field"><label>Created on</label><div class="readout" id="orderinfo-created">—</div></div>
+    <div class="modal-actions"><button class="btn ghost" id="orderinfo-close">Close</button></div>
+  </div>
+</div>
+
 <script>
 let generators = [], drivers = [], contacts = [], orders = [];
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
@@ -317,19 +369,34 @@ const daysUntil = (dateStr) => { if(!dateStr) return null; const d = new Date(da
 const money = (n) => '₹' + (Number(n)||0).toLocaleString('en-IN');
 const fmtDate = (d) => { if(!d) return '—'; const dt = new Date(d+'T00:00:00'); return dt.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}); };
 
+async function storageGet(key){
+  if(typeof window.storage !== 'undefined' && window.storage && window.storage.get){
+    try{
+      const r = await window.storage.get(key, true);
+      return r ? JSON.parse(r.value) : [];
+    }catch(e){ return []; }
+  }
+  try{
+    const raw = localStorage.getItem('srg_'+key);
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){ return []; }
+}
+async function storageSet(key, value){
+  if(typeof window.storage !== 'undefined' && window.storage && window.storage.set){
+    try{ await window.storage.set(key, JSON.stringify(value), true); return; }catch(e){}
+  }
+  try{ localStorage.setItem('srg_'+key, JSON.stringify(value)); }catch(e){}
+}
 async function loadAll(){
   const keys = ['generators','drivers','contacts','orders'];
-  const results = await Promise.all(keys.map(async k=>{
-    try{ const r = await window.storage.get(k, true); return r ? JSON.parse(r.value) : []; }
-    catch(e){ return []; }
-  }));
+  const results = await Promise.all(keys.map(k=>storageGet(k)));
   [generators, drivers, contacts, orders] = results;
   renderAll();
 }
-async function saveGenerators(){ try{ await window.storage.set('generators', JSON.stringify(generators), true); }catch(e){console.error(e);} }
-async function saveDrivers(){ try{ await window.storage.set('drivers', JSON.stringify(drivers), true); }catch(e){console.error(e);} }
-async function saveContacts(){ try{ await window.storage.set('contacts', JSON.stringify(contacts), true); }catch(e){console.error(e);} }
-async function saveOrders(){ try{ await window.storage.set('orders', JSON.stringify(orders), true); }catch(e){console.error(e);} }
+async function saveGenerators(){ await storageSet('generators', generators); }
+async function saveDrivers(){ await storageSet('drivers', drivers); }
+async function saveContacts(){ await storageSet('contacts', contacts); }
+async function saveOrders(){ await storageSet('orders', orders); }
 
 function badgeClass(status){
   const map = {'Available':'available','On Job':'onjob','Maintenance':'maint','Off':'maint',
@@ -493,7 +560,7 @@ function renderOrders(){
       <td class="muted">${money(o.advance)}</td>
       <td>${money(balance)}</td>
       <td><span class="badge ${badgeClass(o.status)}">${o.status}</span></td>
-      <td class="actions"><button class="iconbtn" onclick="editOrder('${o.id}')">Edit</button><button class="iconbtn" onclick="deleteOrder('${o.id}')">Delete</button></td>
+      <td class="actions"><button class="iconbtn" onclick="showOrderInfo('${o.id}')" title="Order info">Info</button><button class="iconbtn" onclick="editOrder('${o.id}')">Edit</button><button class="iconbtn" onclick="deleteOrder('${o.id}')">Delete</button></td>
     </tr>`;
   }).join('');
 }
@@ -522,7 +589,7 @@ window.editGen = (id)=>{
   document.getElementById('gen-truck-service-due').value = g.truckServiceDue||'';
   overlayGen.classList.add('active');
 };
-window.deleteGen = (id)=>{ generators = generators.filter(g=>g.id!==id); saveGenerators(); renderAll(); };
+window.deleteGen = (id)=>{ if(!confirm('Delete this generator? This cannot be undone.')) return; generators = generators.filter(g=>g.id!==id); saveGenerators(); renderAll(); };
 document.getElementById('gen-save').onclick = async ()=>{
   const id = document.getElementById('gen-id').value;
   const label = document.getElementById('gen-label').value.trim();
@@ -564,7 +631,7 @@ window.editDriver = (id)=>{
   document.getElementById('driver-license-expiry').value = d.licenseExpiry||'';
   overlayDriver.classList.add('active');
 };
-window.deleteDriver = (id)=>{ drivers = drivers.filter(d=>d.id!==id); saveDrivers(); renderAll(); };
+window.deleteDriver = (id)=>{ if(!confirm('Delete this driver? This cannot be undone.')) return; drivers = drivers.filter(d=>d.id!==id); saveDrivers(); renderAll(); };
 document.getElementById('driver-save').onclick = async ()=>{
   const id = document.getElementById('driver-id').value;
   const name = document.getElementById('driver-name').value.trim();
@@ -594,6 +661,73 @@ function openContactModal(fromOrder){
 }
 document.getElementById('btn-add-contact').onclick = ()=> openContactModal(false);
 document.getElementById('contact-cancel').onclick = ()=> overlayContact.classList.remove('active');
+
+function splitCSVLine(line){
+  const result = []; let cur='', inQuotes=false;
+  for(let i=0;i<line.length;i++){
+    const ch = line[i];
+    if(ch==='"'){ inQuotes = !inQuotes; }
+    else if(ch===',' && !inQuotes){ result.push(cur); cur=''; }
+    else cur += ch;
+  }
+  result.push(cur);
+  return result.map(s=>s.trim());
+}
+function parseCSV(text){
+  const lines = text.split(/\r?\n/).filter(l=>l.trim().length);
+  if(lines.length===0) return [];
+  const headers = splitCSVLine(lines[0]).map(h=>h.toLowerCase());
+  return lines.slice(1).map(line=>{
+    const vals = splitCSVLine(line);
+    const row = {};
+    headers.forEach((h,i)=> row[h] = vals[i]||'');
+    return {
+      name: row['name'] || row['contact name'] || row['customer'] || '',
+      company: row['company'] || row['company name'] || '',
+      gstin: row['gstin'] || '',
+      phone: row['phone'] || row['phone number'] || row['mobile'] || '',
+      address: row['address'] || ''
+    };
+  }).filter(c=>c.name);
+}
+function parseVCF(text){
+  const cards = text.split(/BEGIN:VCARD/i).slice(1);
+  const out = [];
+  cards.forEach(block=>{
+    const lines = block.split(/\r?\n/);
+    let name='', company='', phone='', address='';
+    lines.forEach(line=>{
+      if(/^FN[:;]/i.test(line)) name = line.split(':').slice(1).join(':').trim();
+      else if(/^ORG[:;]/i.test(line)) company = line.split(':').slice(1).join(':').replace(/;/g,' ').trim();
+      else if(/^TEL/i.test(line) && !phone) phone = line.split(':').pop().trim();
+      else if(/^ADR/i.test(line) && !address) address = line.split(':').pop().replace(/;/g,' ').trim();
+    });
+    if(name) out.push({name, company, gstin:'', phone, address});
+  });
+  return out;
+}
+document.getElementById('contact-import-input').addEventListener('change', async (e)=>{
+  const file = e.target.files[0]; if(!file) return;
+  const text = await file.text();
+  const parsed = (/\.vcf$|\.vcard$/i.test(file.name) || /BEGIN:VCARD/i.test(text)) ? parseVCF(text) : parseCSV(text);
+  let added=0, skipped=0;
+  parsed.forEach(p=>{
+    const pDigits = (p.phone||'').replace(/\D/g,'');
+    const dupe = contacts.find(c=>
+      (pDigits && (c.phone||'').replace(/\D/g,'')===pDigits) ||
+      (!pDigits && c.name.trim().toLowerCase()===p.name.trim().toLowerCase())
+    );
+    if(dupe){ skipped++; return; }
+    contacts.push({id: uid(), name:p.name, company:p.company||'', gstin:p.gstin||'', phone:p.phone||'', address:p.address||''});
+    added++;
+  });
+  await saveContacts();
+  renderAll();
+  document.getElementById('import-status').textContent = parsed.length
+    ? `Imported ${added} contact${added===1?'':'s'}${skipped?(', skipped '+skipped+' duplicate'+(skipped===1?'':'s')):''}.`
+    : `No contacts found in that file.`;
+  e.target.value = '';
+});
 window.editContact = (id)=>{
   const c = contacts.find(x=>x.id===id); if(!c) return;
   contactOpenedFromOrder = false;
@@ -606,7 +740,7 @@ window.editContact = (id)=>{
   document.getElementById('contact-address').value = c.address||'';
   overlayContact.classList.add('active');
 };
-window.deleteContact = (id)=>{ contacts = contacts.filter(c=>c.id!==id); saveContacts(); renderAll(); };
+window.deleteContact = (id)=>{ if(!confirm('Delete this contact? This cannot be undone.')) return; contacts = contacts.filter(c=>c.id!==id); saveContacts(); renderAll(); };
 document.getElementById('contact-save').onclick = async ()=>{
   const id = document.getElementById('contact-id').value;
   const name = document.getElementById('contact-name').value.trim();
@@ -709,7 +843,16 @@ window.editOrder = (id)=>{
   updateDuration(); updateBalance();
   overlayOrder.classList.add('active');
 };
-window.deleteOrder = (id)=>{ orders = orders.filter(o=>o.id!==id); saveOrders(); renderAll(); };
+window.deleteOrder = (id)=>{ if(!confirm('Delete this order? This cannot be undone.')) return; orders = orders.filter(o=>o.id!==id); saveOrders(); renderAll(); };
+window.showOrderInfo = (id)=>{
+  const o = orders.find(x=>x.id===id); if(!o) return;
+  const created = o.createdAt
+    ? new Date(o.createdAt).toLocaleString('en-IN', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})
+    : 'Not recorded (order created before this feature was added)';
+  document.getElementById('orderinfo-created').textContent = created;
+  document.getElementById('overlay-orderinfo').classList.add('active');
+};
+document.getElementById('orderinfo-close').onclick = ()=> document.getElementById('overlay-orderinfo').classList.remove('active');
 document.getElementById('order-gen').addEventListener('change', (e)=>{
   const g = generators.find(x=>x.id===e.target.value);
   if(g && g.rate && !document.getElementById('order-rate').value) document.getElementById('order-rate').value = g.rate;
@@ -732,7 +875,7 @@ document.getElementById('order-save').onclick = async ()=>{
     status: document.getElementById('order-status').value
   };
   if(id){ const idx = orders.findIndex(o=>o.id===id); orders[idx] = {...orders[idx], ...data}; }
-  else orders.push({id: uid(), ...data});
+  else orders.push({id: uid(), createdAt: new Date().toISOString(), ...data});
   await saveOrders();
   overlayOrder.classList.remove('active');
   renderAll();
