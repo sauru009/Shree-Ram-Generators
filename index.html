@@ -337,6 +337,67 @@ tr.row-unpaid td:first-child{box-shadow:inset 3px 0 0 var(--red);}
   .modal{max-width:100%; border-radius:22px 22px 0 0; max-height:92vh; padding:18px 18px calc(18px + env(safe-area-inset-bottom)) 18px; animation:sheetUp .28s var(--ease-snap) both;}
   @keyframes sheetUp{from{transform:translateY(32px); opacity:0;} to{transform:translateY(0); opacity:1;}}
 }
+
+/* ===== iPhone / touch-first motion polish ===== */
+:root{--ease-ios:cubic-bezier(.22,1,.36,1);--ease-spring:cubic-bezier(.175,.885,.32,1.275);}
+html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent;}
+body{-webkit-font-smoothing:antialiased;}
+
+/* Give cards a subtle physical response on touch instead of relying on hover. */
+.stat,.card,.tablewrap,.subnav,.header-row,.btn,.iconbtn,.navbtn,.subnavbtn{will-change:transform;}
+@media (hover:none) and (pointer:coarse){
+  .stat.clickable:hover,.btn:hover,.btn.ghost:hover,.iconbtn:hover,#theme-toggle:hover,#bell-toggle:hover,
+  .navbtn:hover,.subnavbtn:hover{transform:none;box-shadow:none;}
+  .stat.clickable:active{transform:scale(.975) translateY(1px);transition-duration:.08s;}
+  .btn:active,.btn.ghost:active{transform:scale(.965);filter:brightness(1.08);}
+  .iconbtn:active,#theme-toggle:active,#bell-toggle:active{transform:scale(.86);}
+  .navbtn:active{transform:scale(.92);}
+  .subnavbtn:active{transform:scale(.95);}
+  tbody tr:active{background:var(--glass-bg-2);transition:background .08s ease;}
+}
+
+/* More cinematic view transitions on mobile. */
+@media (max-width:700px){
+  .view.active{animation:iosViewIn .48s var(--ease-ios) both;}
+  .view.active.dir-back{animation-name:iosViewInBack;}
+  @keyframes iosViewIn{0%{opacity:0;transform:translate3d(34px,0,0) scale(.985);filter:blur(2px)}55%{opacity:1}100%{opacity:1;transform:translate3d(0,0,0) scale(1);filter:blur(0)}}
+  @keyframes iosViewInBack{0%{opacity:0;transform:translate3d(-34px,0,0) scale(.985);filter:blur(2px)}55%{opacity:1}100%{opacity:1;transform:translate3d(0,0,0) scale(1);filter:blur(0)}}
+
+  .subview.active{animation:iosSubIn .4s var(--ease-ios) both;}
+  @keyframes iosSubIn{0%{opacity:0;transform:translate3d(0,10px,0) scale(.992)}100%{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+
+  /* Stagger the dashboard/section elements like native iOS lists. */
+  .view.active .stat,.view.active .section-title,.view.active .header-row,.view.active .hint,
+  .view.active .tablewrap,.view.active .card{animation:iosItemIn .5s var(--ease-ios) both;}
+  .view.active .stat:nth-child(1){animation-delay:.04s}.view.active .stat:nth-child(2){animation-delay:.08s}
+  .view.active .stat:nth-child(3){animation-delay:.12s}.view.active .stat:nth-child(4){animation-delay:.16s}
+  .view.active .tablewrap{animation-delay:.12s}
+  .view.active .section-title{animation-delay:.05s}
+  @keyframes iosItemIn{0%{opacity:0;transform:translate3d(0,16px,0) scale(.985)}60%{opacity:1}100%{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+
+  /* Bottom navigation gets a tiny spring/bounce on selection. */
+  .navbtn.active{animation:navPop .42s var(--ease-spring) both;}
+  .navbtn.active svg,.navbtn.active i{animation:navIconPop .46s var(--ease-spring) both;}
+  @keyframes navPop{0%{transform:scale(.86)}65%{transform:scale(1.07)}100%{transform:scale(1)}}
+  @keyframes navIconPop{0%{transform:translateY(3px) scale(.78)}70%{transform:translateY(-1px) scale(1.1)}100%{transform:translateY(0) scale(1)}}
+
+  /* Mobile sheet/modal feels more native. */
+  .overlay.active{animation:iosOverlay .3s var(--ease-ios) both;}
+  .modal{animation:iosSheet .5s var(--ease-ios) both;box-shadow:0 -12px 50px rgba(0,0,0,.25);}
+  @keyframes iosOverlay{from{opacity:0}to{opacity:1}}
+  @keyframes iosSheet{0%{opacity:0;transform:translate3d(0,42px,0) scale(.985)}55%{opacity:1}100%{opacity:1;transform:translate3d(0,0,0) scale(1)}}
+
+  /* Press glow gives visible feedback even without hover. */
+  .touching{filter:brightness(1.07);}
+  .touching::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;animation:touchGlow .38s ease-out both;}
+  @keyframes touchGlow{from{box-shadow:inset 0 0 0 0 rgba(255,255,255,.16)}to{box-shadow:inset 0 0 0 10px rgba(255,255,255,0)}}
+}
+
+/* Respect iOS accessibility / Reduce Motion. */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important;}
+}
+
 </style>
 </head>
 <body>
@@ -1934,6 +1995,23 @@ setInterval(()=>{
   renderFleet();
   renderDrivers();
 }, 60000);
+</script>
+
+<script>
+/* iPhone touch feedback: lightweight, delegated, no per-element listeners. */
+(function(){
+  if(!window.matchMedia || !matchMedia('(hover:none) and (pointer:coarse)').matches) return;
+  const selector='.btn,.btn.ghost,.iconbtn,.navbtn,.subnavbtn,.stat.clickable,.tablewrap tbody tr,#theme-toggle,#bell-toggle';
+  let active=null;
+  document.addEventListener('touchstart',e=>{
+    const el=e.target.closest(selector);
+    if(!el) return;
+    active=el; el.classList.add('touching');
+  },{passive:true});
+  const clear=()=>{if(active){active.classList.remove('touching');active=null;}};
+  document.addEventListener('touchend',clear,{passive:true});
+  document.addEventListener('touchcancel',clear,{passive:true});
+})();
 </script>
 </body>
 </html>
